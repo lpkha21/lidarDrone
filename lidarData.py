@@ -82,8 +82,8 @@ def data_processor():
                         distance = ((s3 << 16) | (s2 << 8) | s1) / 1000.0  # Convert to meters
                         angle = (endAngle - startAngle) / ls * i + startAngle
 
-                        if DISTANCE_MIN <= distance <= DISTANCE_MAX and (angle <= 60 or angle >= 300):
-                            if angle >= 300:
+                        if DISTANCE_MIN <= distance <= DISTANCE_MAX and (angle <= 45 or angle >= 315):
+                            if angle >= 315:
                                 angle = 360 - angle
                                 new_x.append(-(distance * np.sin(np.radians(angle))))
                             else:
@@ -97,12 +97,12 @@ def data_processor():
                         y_coords.extend(new_y)
                         z_coords.extend(new_z)
                         if counter == 10:
-                            x_coords = deque(list(x_coords)[500:])
-                            y_coords = deque(list(y_coords)[500:])
+                            x_coords = deque(list(x_coords)[50:])
+                            y_coords = deque(list(y_coords)[50:])
                             tmp = y_coords[i]
                             for i in range(len(y_coords)):
                                 y_coords[i] = y_coords[i]-tmp
-                            z_coords = deque(list(z_coords)[500:])
+                            z_coords = deque(list(z_coords)[50:])
                             counter = 0
 
                         
