@@ -1,6 +1,7 @@
 import serial
 import threading
 import queue
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -16,9 +17,6 @@ data_queue = queue.Queue()
 running = threading.Event()
 running.set()
 
-# Filter settings
-DISTANCE_MIN = 0.1  # Minimum distance (in meters)
-DISTANCE_MAX = 1000.0  # Maximum distance (in meters)
 
 # Use deques with a maximum length to store processed data
 MAX_POINTS = 100000  # Adjust this value based on your memory constraints
@@ -29,6 +27,11 @@ z_coords = deque(maxlen=MAX_POINTS)
 # Drone settings
 drone_altitude = 1000  # Drone altitude in meters
 drone_position_y = 0  # Y position of the drone
+
+# Filter settings
+DISTANCE_MIN = 40  # Minimum distance (in meters)
+DISTANCE_MAX = drone_altitude / math.cos(math.radians(30)) # Maximum distance (in meters)
+
 
 # Lock for thread-safe operations on shared data
 data_lock = threading.Lock()
@@ -45,6 +48,7 @@ def serial_reader():
 
 # Thread 2: Data processor
 def data_processor():
+    deleteSize = 0
     global drone_position_y
     global x_coords
     global y_coords
@@ -79,15 +83,19 @@ def data_processor():
                         s1 = data_queue.get(timeout=1)
                         s2 = data_queue.get(timeout=1)
                         s3 = data_queue.get(timeout=1)
-                        distance = ((s3 << 16) | (s2 << 8) | s1) / 1000.0  # Convert to meters
-                        angle = (endAngle - startAngle) / ls * i + startAngle
+                        distance = ((s3 << 16) | (s2 << 8)) / 1000.0  # Convert to meters
+                        angle = (endAngle - startAngle) / ls * i  + startAngle
+                        
 
-                        if DISTANCE_MIN <= distance <= DISTANCE_MAX and (angle <= 45 or angle >= 315):
-                            if angle >= 315:
-                                angle = 360 - angle
-                                new_x.append(-(distance * np.sin(np.radians(angle))))
+                        if DISTANCE_MIN < distance < DISTANCE_MAX and (angle >= 60  and angle <= 120):
+                            # temp = str(distance) + " " + str(angle)
+                            # print(temp)
+                            if angle >= 90:
+                                angle = angle - 90
+                                new_x.append(-(distance * math.sin(math.radians(angle))))
                             else:
-                                new_x.append(distance * np.sin(np.radians(angle)))
+                                angle = 90 - angle
+                                new_x.append(distance * math.sin(math.radians(angle)))
                             new_y.append(drone_position_y)
                             new_z.append(drone_altitude - distance * np.cos(np.radians(angle)))
 
@@ -96,19 +104,20 @@ def data_processor():
                         x_coords.extend(new_x)
                         y_coords.extend(new_y)
                         z_coords.extend(new_z)
-                        if counter == 10:
-                            x_coords = deque(list(x_coords)[50:])
-                            y_coords = deque(list(y_coords)[50:])
+                        if counter == 40:
+                            deleteSize = len(new_x)
+                            x_coords = deque(list(x_coords)[deleteSize:])
+                            y_coords = deque(list(y_coords)[deleteSize:])
                             tmp = y_coords[i]
                             for i in range(len(y_coords)):
                                 y_coords[i] = y_coords[i]-tmp
-                            z_coords = deque(list(z_coords)[50:])
-                            counter = 0
+                            z_coords = deque(list(z_coords)[deleteSize:])
+                            deleteSize = 0
 
-                        
-                    
+                  
                     if ls == 1:
-                        counter += 1
+                        if counter < 40:
+                            counter += 1
                         with drone_position_y_lock:
                             drone_position_y -= 0.1
 
@@ -133,9 +142,9 @@ ax = fig.add_subplot(111, projection='3d')
 scatter = ax.scatter([], [], [], s = 10)
 
 # Set labels for axes
-ax.set_xlabel('X (meters)')
-ax.set_ylabel('Y (meters)')
-ax.set_zlabel('Z (meters)')
+ax.set_xlabel('X (mm)')
+ax.set_ylabel('Y (mm)')
+ax.set_zlabel('Z (mm)')
 
 # Add colorbar
 

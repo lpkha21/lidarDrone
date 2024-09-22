@@ -4,8 +4,8 @@
 #include <RF24.h>
 #include <HardwareSerial.h>
 
-#define QUEUE_SIZE 300  // Number of items in the queue
-#define ITEM_SIZE 128      // Size of each item (32 bytes)
+#define QUEUE_SIZE 800  // Number of items in the queue
+#define ITEM_SIZE 128     // Size of each item (32 bytes)
 
 struct Payload{
   uint8_t s[32];
@@ -77,9 +77,6 @@ void setup() {
 
 }
 
-#define QUEUE_SIZE 400  // Adjusted queue size for more buffer space
-#define ITEM_SIZE 128   // Keep the item size
-
 void lidarTask(void *parameter) {
   uint8_t lidarData[ITEM_SIZE];
 
@@ -112,8 +109,6 @@ void nrfTask(void *parameter) {
     }
   }
 }
-
-
 
 void loop() {
   // nothings

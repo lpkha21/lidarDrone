@@ -40,8 +40,7 @@ void loop()
 	   radio.read(&payload, sizeof(payload)); 
 	   Serial.write(payload.s, sizeof(payload.s));
      Serial.flush();
-     
-    // Serial.println(payload.s[0]);
+     //Serial.println(payload.s[0]);
 	   lastSignalMillis = currentMillis; 
 	 } 
 	 if (currentMillis - lastSignalMillis > INTERVAL_MS_SIGNAL_LOST) { 
@@ -50,6 +49,5 @@ void loop()
 } 
 void lostConnection() 
 { 
-  
 	delay(INTERVAL_MS_SIGNAL_RETRY); 
 } 
