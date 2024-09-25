@@ -28,13 +28,6 @@ HardwareSerial lidarSerial(1); // Assuming you're using Serial1 for the Lidar
 void sendCommand(uint8_t* command, size_t length) {
   lidarSerial.write(command, length);
   lidarSerial.flush();
-  Serial.print("Sent command: ");
-  for (size_t i = 0; i < length; i++) {
-    Serial.print("0x");
-    Serial.print(command[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
 }
 
 
@@ -44,9 +37,9 @@ void setup() {
   lidarSerial.setRxBufferSize(32768);
 
   // NRF24L01 setup
-    radio.begin(); 
+  radio.begin(); 
 	 //Append ACK packet from the receiving radio back to the transmitting radio 
-	 radio.setAutoAck(false); //(true|false) 
+  radio.setAutoAck(false); //(true|false) 
 	 //Set the transmission datarate 
 	 radio.setDataRate(RF24_2MBPS); //(RF24_250KBPS|RF24_1MBPS|RF24_2MBPS) 
 	 //Greater level = more consumption = longer distance 
@@ -61,7 +54,6 @@ void setup() {
   lidarQueue = xQueueCreate(QUEUE_SIZE, ITEM_SIZE);
 
   if (lidarQueue == NULL) {
-    Serial.println("Error creating the queue");
     while (1);
   }
 
@@ -75,6 +67,11 @@ void setup() {
   uint8_t startCommand[] = {0xA5, 0x60};
   sendCommand(startCommand, sizeof(startCommand));
 
+  uint8_t incFreq[] = {0xA5, 0x0B};
+  for(int i = 0; i < 6; i++){
+    sendCommand(incFreq, sizeof(incFreq));
+  }
+
 }
 
 void lidarTask(void *parameter) {
@@ -87,7 +84,6 @@ void lidarTask(void *parameter) {
 
         // Add the data to the queue
         if (xQueueSend(lidarQueue, lidarData, portMAX_DELAY) != pdPASS) {
-          Serial.println("Queue is full, data dropped");
           lidarSerial.flush(); // Optional
         }
       }

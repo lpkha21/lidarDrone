@@ -25,7 +25,7 @@ y_coords = deque(maxlen=MAX_POINTS)
 z_coords = deque(maxlen=MAX_POINTS)
 
 # Drone settings
-drone_altitude = 1000  # Drone altitude in meters
+drone_altitude = 2000  # Drone altitude in meters
 drone_position_y = 0  # Y position of the drone
 
 # Filter settings
@@ -108,9 +108,9 @@ def data_processor():
                             deleteSize = len(new_x)
                             x_coords = deque(list(x_coords)[deleteSize:])
                             y_coords = deque(list(y_coords)[deleteSize:])
-                            tmp = y_coords[i]
-                            for i in range(len(y_coords)):
-                                y_coords[i] = y_coords[i]-tmp
+                            tmp = y_coords[0]
+                            for j in range(len(y_coords)):
+                                y_coords[j] = y_coords[j]-tmp
                             z_coords = deque(list(z_coords)[deleteSize:])
                             deleteSize = 0
 
@@ -118,8 +118,8 @@ def data_processor():
                     if ls == 1:
                         if counter < 40:
                             counter += 1
-                        with drone_position_y_lock:
-                            drone_position_y -= 0.1
+                    with drone_position_y_lock:
+                        drone_position_y -= 0.1
 
         except queue.Empty:
             pass
