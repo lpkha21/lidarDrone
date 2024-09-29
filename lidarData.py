@@ -25,7 +25,7 @@ y_coords = deque(maxlen=MAX_POINTS)
 z_coords = deque(maxlen=MAX_POINTS)
 
 # Drone settings
-drone_altitude = 2000  # Drone altitude in meters
+drone_altitude = 10000  # Drone altitude in meters
 drone_position_y = 0  # Y position of the drone
 
 # Filter settings

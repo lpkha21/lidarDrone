@@ -26,7 +26,7 @@ void setup()
 	 //Set the transmission datarate 
 	 radio.setDataRate(RF24_2MBPS); //(RF24_250KBPS|RF24_1MBPS|RF24_2MBPS) 
 	 //Greater level = more consumption = longer distance 
-	 radio.setPALevel(RF24_PA_MIN); //(RF24_PA_MIN|RF24_PA_LOW|RF24_PA_HIGH|RF24_PA_MAX) 
+	 radio.setPALevel(RF24_PA_MAX); //(RF24_PA_MIN|RF24_PA_LOW|RF24_PA_HIGH|RF24_PA_MAX) 
 	 //Default value is the maximum 32 bytes1 
 	 radio.setPayloadSize(sizeof(payload)); 
 	 //Act as receiver 
